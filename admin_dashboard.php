@@ -147,6 +147,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'durations' => []
         ];
 
+        if (isset($_POST['discount_toggle']) && $_POST['discount_toggle'] === 'on') {
+            $new_product['discount'] = [
+                'type' => $_POST['discount_type'],
+                'value' => (float)$_POST['discount_value']
+            ];
+        }
+
         $products[] = $new_product;
         save_products($products);
 
@@ -459,6 +466,25 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                             <input type="checkbox" name="isFeatured" id="isFeatured" value="true">
                         </div>
 
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="discount-toggle">Apply Discount?</label>
+                            <input type="checkbox" name="discount_toggle" id="discount-toggle">
+                        </div>
+
+                        <div id="discount-fields" style="display: none;">
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label for="discount-type">Discount Type</label>
+                                <select name="discount_type" id="discount-type" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);">
+                                    <option value="percentage">Percentage</option>
+                                    <option value="fixed">Fixed Amount</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label for="discount-value">Discount Value</label>
+                                <input type="number" step="0.01" name="discount_value" id="discount-value" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);">
+                            </div>
+                        </div>
+
                         <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; border: none; background-color: var(--primary-color); color: white; border-radius: var(--border-radius); cursor: pointer;">Add Product</button>
                     </form>
                 </div>
@@ -678,5 +704,21 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
         });
     </script>
     <script src="admin_dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const discountToggle = document.getElementById('discount-toggle');
+            const discountFields = document.getElementById('discount-fields');
+
+            if (discountToggle && discountFields) {
+                discountToggle.addEventListener('change', function() {
+                    if (this.checked) {
+                        discountFields.style.display = 'block';
+                    } else {
+                        discountFields.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
