@@ -10,5 +10,14 @@
         "category": [
             "Course"
         ]
+    },
+    {
+        "code": "SIMPLIFIED",
+        "discount_type": "fixed",
+        "discount_value": 100,
+        "product_ids": [
+            "1"
+        ],
+        "category": "Software"
     }
 ]

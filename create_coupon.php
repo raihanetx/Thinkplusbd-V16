@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 header('Content-Type: application/json');
 
@@ -12,16 +11,7 @@ function generate_random_string($length = 8) {
     return $random_string;
 }
 
-if (php_sapi_name() === 'cli') {
-    // Executed from command line
-    $input = array(
-        "discount_type" => "percentage",
-        "discount_value" => 10
-    );
-} else {
-    // Executed from web server
-    $input = json_decode(file_get_contents('php://input'), true);
-}
+$input = json_decode(file_get_contents('php://input'), true);
 
 $code = isset($input['code']) ? trim($input['code']) : '';
 if (empty($code)) {
@@ -33,7 +23,7 @@ $discount_value = isset($input['discount_value']) ? (float)$input['discount_valu
 $product_ids = isset($input['product_ids']) ? $input['product_ids'] : null;
 $category = isset($input['category']) ? trim($input['category']) : null;
 
-if (!empty($code) && $discount_value > 0) {
+if (!empty($code) && $discount_value > 0 && !empty($category) && !empty($product_ids)) {
     $coupons_file_path = __DIR__ . '/coupons.json';
     $coupons = [];
     if (file_exists($coupons_file_path)) {
@@ -57,5 +47,5 @@ if (!empty($code) && $discount_value > 0) {
     exit();
 }
 
-echo json_encode(['success' => false]);
+echo json_encode(['success' => false, 'message' => 'Invalid input.']);
 ?>
