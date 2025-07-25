@@ -32,12 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         file_put_contents($reviews_file_path, $json_data);
 
         $redirect_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.html';
-        header("Location: " . $redirect_url . "&status=review_submitted");
+        $separator = parse_url($redirect_url, PHP_URL_QUERY) ? '&' : '?';
+        header("Location: " . $redirect_url . $separator . "status=review_submitted");
         exit();
     }
 }
 
 $redirect_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.html';
-header("Location: " . $redirect_url . "&status=review_failed");
+$separator = parse_url($redirect_url, PHP_URL_QUERY) ? '&' : '?';
+header("Location: " . $redirect_url . $separator . "status=review_failed");
 exit();
 ?>

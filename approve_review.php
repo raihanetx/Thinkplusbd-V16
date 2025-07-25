@@ -25,10 +25,8 @@ function approve_review($review_id) {
     return ['success' => false];
 }
 
-if (isset($_POST['id'])) {
-    header('Content-Type: application/json');
-    $input = json_decode(file_get_contents('php://input'), true);
-    $review_id = isset($input['id']) ? (string)$input['id'] : '';
-    echo json_encode(approve_review($review_id));
-}
+header('Content-Type: application/json');
+$input = json_decode(file_get_contents('php://input'), true);
+$review_id = isset($input['id']) ? (string)$input['id'] : '';
+echo json_encode(approve_review($review_id));
 ?>

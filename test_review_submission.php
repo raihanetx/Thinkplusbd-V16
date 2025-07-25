@@ -1,4 +1,5 @@
 <?php
+$_SERVER['REQUEST_METHOD'] = 'POST';
 $_POST = array(
     "product_id" => 1,
     "name" => "Test User",
