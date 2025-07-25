@@ -3,11 +3,12 @@ header('Content-Type: application/json');
 $input = json_decode(file_get_contents('php://input'), true);
 
 $code = isset($input['code']) ? trim($input['code']) : '';
-$discount_percentage = isset($input['discount_percentage']) ? (int)$input['discount_percentage'] : 0;
+$discount_type = isset($data['discount_type']) ? $data['discount_type'] : 'percentage';
+$discount_value = isset($data['discount_value']) ? (float)$data['discount_value'] : 0;
 $product_ids = isset($input['product_ids']) ? $input['product_ids'] : null;
 $category = isset($input['category']) ? trim($input['category']) : null;
 
-if (!empty($code) && $discount_percentage > 0) {
+if (!empty($code) && $discount_value > 0) {
     $coupons_file_path = __DIR__ . '/coupons.json';
     $coupons = [];
     if (file_exists($coupons_file_path)) {
@@ -17,7 +18,8 @@ if (!empty($code) && $discount_percentage > 0) {
 
     $new_coupon = [
         'code' => $code,
-        'discount_percentage' => $discount_percentage,
+        'discount_type' => $discount_type,
+        'discount_value' => $discount_value,
         'product_ids' => $product_ids,
         'category' => $category,
     ];

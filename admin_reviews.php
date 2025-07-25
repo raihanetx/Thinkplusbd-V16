@@ -15,10 +15,40 @@ if (!isset($_SESSION['admin'])) {
     <link rel="stylesheet" href="admin_dashboard.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Manage Reviews</h1>
-        <div id="reviews-container"></div>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="logo-admin">
+                <img src="https://i.postimg.cc/4NtztqPt/IMG-20250603-130207-removebg-preview-1.png" alt="THINK PLUS BD Logo">
+            </div>
+            <nav class="admin-nav">
+                <ul>
+                    <li><a href="admin_dashboard.php"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a></li>
+                    <li><a href="admin_dashboard.php?page=categories"><i class="fas fa-tags"></i> <span>Manage Categories</span></a></li>
+                    <li><a href="admin_dashboard.php?page=edit_products"><i class="fas fa-edit"></i> <span>Edit Products</span></a></li>
+                    <li><a href="admin_reviews.php" class="active"><i class="fas fa-star"></i> <span>Manage Reviews</span></a></li>
+                    <li><a href="admin_coupons.php"><i class="fas fa-tags"></i> <span>Manage Coupons</span></a></li>
+                    <li><a href="product_code_generator.html" target="_blank"><i class="fas fa-plus-circle"></i> <span>Add Product Helper</span></a></li>
+                    <li><a href="admin_dashboard.php?logout=1"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="admin-main-content" id="adminMainContent">
+            <header class="admin-topbar">
+                <div style="display:flex; align-items:center;">
+                    <i class="fas fa-bars sidebar-toggle" id="sidebarToggle"></i>
+                    <h1>Manage Reviews</h1>
+                </div>
+                <a href="admin_dashboard.php?logout=1" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </header>
+            <div class="admin-page-content">
+                <div class="content-card">
+                    <h2 class="card-title">All Reviews</h2>
+                    <div id="reviews-container"></div>
+                </div>
+            </div>
+        </main>
     </div>
+    <script src="admin_dashboard.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             fetch('get_reviews.php')
