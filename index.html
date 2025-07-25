@@ -587,70 +587,30 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         .product-detail-actions .add-to-cart-detail { padding: 0.9rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; background-color: transparent; color: var(--primary-color); border: 2px solid var(--primary-color) !important; }
         .product-detail-actions .add-to-cart-detail:hover { background-color: rgba(143,135,241,0.1); border-color: var(--primary-color); filter: brightness(0.95); }
 
-        .sticky-add-to-cart-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #fff;
-            padding: 1rem;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
+        .product-detail-tabs {
+            margin-top: 2rem;
+            border-bottom: 1px solid #ddd;
             display: flex;
-            justify-content: center;
         }
-
-        .add-to-cart-sticky {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            font-size: 1.2rem;
-            font-weight: 600;
-            border-radius: 5px;
+        .product-detail-tab {
+            padding: 1rem 1.5rem;
             cursor: pointer;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .accordion {
-            margin-top: 1rem;
-        }
-
-        .accordion-item {
-            border-bottom: 1px solid #eee;
-        }
-
-        .accordion-header {
-            background-color: #f7f7f7;
-            border: none;
-            width: 100%;
-            text-align: left;
-            padding: 1rem;
             font-size: 1.1rem;
             font-weight: 600;
-            cursor: pointer;
-            position: relative;
+            color: #555;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
         }
-
-        .accordion-header::after {
-            content: '+';
-            position: absolute;
-            right: 1rem;
-            font-size: 1.5rem;
+        .product-detail-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
         }
-
-        .accordion-content {
-            padding: 1rem;
+        .product-detail-tab-content {
+            padding: 2rem 0;
             display: none;
         }
-
-        .accordion-item.active .accordion-content {
+        .product-detail-tab-content.active {
             display: block;
-        }
-
-        .accordion-item.active .accordion-header::after {
-            content: '-';
         }
 
         .related-products-section { margin-top: 3rem; padding: 2rem 0; background: transparent; }
@@ -2355,8 +2315,6 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             const shortDescription = product.description ? nl2br(htmlspecialchars_decode(product.description)) : 'An exceptional digital product.';
             const longDescription = product.longDescription ? nl2br(htmlspecialchars_decode(product.longDescription)) : shortDescription;
 
-            const stockStatus = product.stock > 0 ? "In Stock" : "Out of Stock";
-
             detailPageElement.innerHTML = `
                 <div class="product-detail-container">
                     <div class="product-detail-main-image-container">${tempImageDiv.innerHTML}</div>
@@ -2364,48 +2322,49 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
                         <h2 class="product-detail-title">${product.name || 'N/A'}</h2>
                         <p class="product-detail-description">${shortDescription}</p>
                         <div class="product-detail-price">৳${currentPrice.toFixed(2)}</div>
+                        ${durationSelectorHTML}
                         <div class="product-detail-actions">
                             <button class="buy-now-detail">Buy Now</button>
-                            <button class="add-to-cart-detail"><i class="fas fa-shopping-cart"></i></button>
+                            <button class="add-to-cart-detail">Add to Cart</button>
                         </div>
                     </div>
                 </div>
-                <div class="accordion">
-                    <div class="accordion-item">
-                        <button class="accordion-header">Description</button>
-                        <div class="accordion-content">
-                            <p>${longDescription}</p>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <button class="accordion-header">Reviews</button>
-                        <div class="accordion-content">
-                            <div id="reviews-container"></div>
-                            <form action="submit_review.php" method="POST" class="review-form">
-                                <input type="hidden" name="product_id" value="${product.id}">
-                                <div class="form-group">
-                                    <label for="name">Name:</label>
-                                    <input type="text" name="name" id="name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="rating">Rating:</label>
-                                    <select name="rating" id="rating" required>
-                                        <option value="5">5 Stars</option>
-                                        <option value="4">4 Stars</option>
-                                        <option value="3">3 Stars</option>
-                                        <option value="2">2 Stars</option>
-                                        <option value="1">1 Star</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="comment">Comment:</label>
-                                    <textarea name="comment" id="comment" rows="4" required></textarea>
-                                </div>
-                                <button type="submit">Submit Review</button>
-                            </form>
-                        </div>
-                    </div>
+
+                <div class="product-detail-tabs">
+                    <div class="product-detail-tab active" data-tab="description">Description</div>
+                    <div class="product-detail-tab" data-tab="reviews">Reviews</div>
                 </div>
+
+                <div id="description" class="product-detail-tab-content active">
+                    <p>${longDescription}</p>
+                </div>
+
+                <div id="reviews" class="product-detail-tab-content">
+                    <div id="reviews-container"></div>
+                    <form action="submit_review.php" method="POST" class="review-form">
+                        <input type="hidden" name="product_id" value="${product.id}">
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <input type="text" name="name" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rating">Rating:</label>
+                            <select name="rating" id="rating" required>
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">Comment:</label>
+                            <textarea name="comment" id="comment" rows="4" required></textarea>
+                        </div>
+                        <button type="submit">Submit Review</button>
+                    </form>
+                </div>
+
                 ${relatedProductsHTML}
             `;
 
@@ -2454,7 +2413,29 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             }
 
             setupRelatedProductImages();
-            setupAccordion();
+            setupTabs();
+        }
+
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.product-detail-tab');
+            const tabContents = document.querySelectorAll('.product-detail-tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.tab;
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    tabContents.forEach(content => {
+                        if (content.id === target) {
+                            content.classList.add('active');
+                        } else {
+                            content.classList.remove('active');
+                        }
+                    });
+                });
+            });
         }
 
         function getRelatedProducts(currentProductId, category, limit = 4) { const dataToUse = (allProductsData && allProductsData.length > 0) ? allProductsData : generateDemoProducts(); if (!dataToUse || dataToUse.length === 0) return []; const relatedProducts = dataToUse.filter(product => product.category === category && product.id !== currentProductId); const shuffled = relatedProducts.sort(() => Math.random() - 0.5); return shuffled.slice(0, limit); }
@@ -2466,16 +2447,6 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         function setupRelatedProductImages() { const relatedImages = document.querySelectorAll('.related-product-image-container img.image-fade-in'); relatedImages.forEach(img => { setupSingleImageLoading(img); }); }
         function handleProductCardBuyNow(productId) { const product = getProductById(productId); if (product) { const productForCart = { ...product }; if (product.category === 'subscription' && Array.isArray(product.durations) && product.durations.length > 0) { productForCart.price = parseFloat(product.durations[0].price); productForCart.selectedDurationLabel = product.durations[0].label; } else { productForCart.price = parseFloat(product.price); delete productForCart.selectedDurationLabel; } delete productForCart.currentSelectedPrice; cart = [{ ...productForCart, quantity: 1 }]; updateCart(); navigateTo('checkout', null, null, true); } }
         
-        function setupAccordion() {
-            const accordionItems = document.querySelectorAll('.accordion-item');
-            accordionItems.forEach(item => {
-                const header = item.querySelector('.accordion-header');
-                header.addEventListener('click', () => {
-                    item.classList.toggle('active');
-                });
-            });
-        }
-
         function updateCheckoutPageOrderSummary() {
             const orderItemsElement = domElements.orderItemsCheckout; const orderTotalElement = domElements.orderTotalCheckout; const submitButton = domElements.checkoutForm ? domElements.checkoutForm.querySelector('.submit-btn') : null;
             if (!orderItemsElement || !orderTotalElement) return;
