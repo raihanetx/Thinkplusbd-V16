@@ -16,5 +16,14 @@
         "comment": "I liked it, but it could be better.",
         "timestamp": "2025-07-25T13:00:00Z",
         "status": "approved"
+    },
+    {
+        "id": "62e0c6a8c0e4a",
+        "product_id": 1,
+        "name": "Test User",
+        "rating": 5,
+        "comment": "This is a test review.",
+        "timestamp": "2025-07-26 11:28:27",
+        "status": "approved"
     }
 ]

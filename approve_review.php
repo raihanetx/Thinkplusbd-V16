@@ -1,9 +1,9 @@
 <?php
 header('Content-Type: application/json');
 $input = json_decode(file_get_contents('php://input'), true);
-$review_id = isset($input['id']) ? (int)$input['id'] : -1;
+$review_id = isset($input['id']) ? (string)$input['id'] : '';
 
-if ($review_id >= 0) {
+if (!empty($review_id)) {
     $reviews_file_path = __DIR__ . '/reviews.json';
     if (file_exists($reviews_file_path)) {
         $reviews_json = file_get_contents($reviews_file_path);
