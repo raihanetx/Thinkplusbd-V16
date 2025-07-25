@@ -6,19 +6,73 @@
     <h2 class="card-title">All Coupons</h2>
     <div id="coupons-container"></div>
 </div>
+<style>
+#create-coupon-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#create-coupon-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+#create-coupon-form input[type="text"],
+#create-coupon-form input[type="number"],
+#create-coupon-form select {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+}
+
+#create-coupon-form .coupon-code-container {
+    display: flex;
+}
+
+#create-coupon-form #coupon-code {
+    flex-grow: 1;
+}
+
+#create-coupon-form #generate-random-code {
+    width: 150px;
+    margin-left: 10px;
+    padding: 0.75rem;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+#create-coupon-form button[type="submit"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+}
+</style>
 <div class="content-card">
     <h2 class="card-title">Create Coupon</h2>
     <form id="create-coupon-form">
         <div class="form-group">
             <label for="coupon-code">Coupon Code</label>
-            <div style="display: flex;">
-                <input type="text" id="coupon-code" style="flex-grow: 1;">
+            <div class="coupon-code-container">
+                <input type="text" id="coupon-code">
                 <button type="button" id="generate-random-code">Generate Random</button>
             </div>
         </div>
         <div class="form-group">
             <label for="category-select">Category</label>
-            <select id="category-select" required></select>
+            <select id="category-select" required>
+                <option value="">-- Select a category --</option>
+            </select>
         </div>
         <div class="form-group">
             <label for="product-select">Products</label>
@@ -95,11 +149,13 @@ document.addEventListener('DOMContentLoaded', function() {
     categorySelect.addEventListener('change', function() {
         const selectedCategory = this.value;
         productSelect.innerHTML = '';
-        const filteredProducts = allProducts.filter(product => product.category === selectedCategory);
-        filteredProducts.forEach(product => {
-            const option = new Option(product.name, product.id);
-            productSelect.add(option);
-        });
+        if (selectedCategory) {
+            const filteredProducts = allProducts.filter(product => product.category === selectedCategory);
+            filteredProducts.forEach(product => {
+                const option = new Option(product.name, product.id);
+                productSelect.add(option);
+            });
+        }
     });
 
     // Random code generation
@@ -119,6 +175,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const category = categorySelect.value;
         const product_ids = Array.from(productSelect.selectedOptions).map(option => option.value);
 
+        if (!category) {
+            alert('Please select a category.');
+            return;
+        }
+
+        if (product_ids.length === 0) {
+            alert('Please select at least one product.');
+            return;
+        }
+
         fetch('create_coupon.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -126,68 +192,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 code,
                 discount_type,
                 discount_value,
-                product_ids: product_ids.length > 0 ? product_ids : null,
-                category: category_ids.length > 0 ? category_ids : null
+                category,
+                product_ids
             }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                if (reload) {
-                    location.reload();
-                } else {
-                    createCouponForm.reset();
-                    updatePreview();
-                    // Re-fetch coupons to show the newly created one
-                    fetch('get_coupons.php')
-                        .then(response => response.json())
-                        .then(data => {
-                            const container = document.getElementById('coupons-container');
-                            if (data.error) {
-                                container.innerHTML = `<p>${data.error}</p>`;
-                                return;
-                            }
-                            if (data.length === 0) {
-                                container.innerHTML = '<p>No coupons to display.</p>';
-                                return;
-                            }
-                            let html = '<table>';
-                            html += '<tr><th>Code</th><th>Discount</th><th>Product IDs</th><th>Category</th><th>Action</th></tr>';
-                            data.forEach(coupon => {
-                                html += `
-                                    <tr>
-                                        <td>${coupon.code}</td>
-                                        <td>${coupon.discount_value}${coupon.discount_type === 'percentage' ? '%' : ' Taka'}</td>
-                                        <td>${coupon.product_ids ? coupon.product_ids.join(', ') : 'All'}</td>
-                                        <td>${coupon.category ? coupon.category.join(', ') : 'All'}</td>
-                                        <td>
-                                            <button onclick="deleteCoupon('${coupon.code}')">Delete</button>
-                                        </td>
-                                    </tr>
-                                `;
-                            });
-                            html += '</table>';
-                            container.innerHTML = html;
-                        });
-                    alert('Coupon created successfully!');
-                }
+                location.reload();
             } else {
-                alert('Failed to create coupon.');
+                alert('Failed to create coupon: ' + (data.message || ''));
             }
         });
-    }
-
-    createCouponForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        submitForm();
-    });
-
-    document.getElementById('save-and-create-another').addEventListener('click', function() {
-        submitForm(false);
     });
 });
 
 function deleteCoupon(couponCode) {
+    if (!confirm('Are you sure you want to delete this coupon?')) {
+        return;
+    }
     fetch('delete_coupon.php', {
         method: 'POST',
         headers: {
