@@ -1,6 +1,6 @@
 <?php
 $_POST = json_encode(array(
-    "id" => 0
+    "id" => 1
 ));
 
 include 'approve_review.php';
