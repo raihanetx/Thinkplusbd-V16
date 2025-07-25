@@ -12,7 +12,7 @@ if (!empty($review_id)) {
         // Find the review by its ID and update its status
         $review_found = false;
         foreach ($reviews as $key => &$review) {
-            if (isset($review['id']) && $review['id'] === $review_id) {
+            if (isset($review['id']) && $review['id'] == $review_id) {
                 $reviews[$key]['status'] = 'approved';
                 $review_found = true;
                 break;
