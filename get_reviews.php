@@ -18,10 +18,7 @@ if (file_exists($reviews_file_path) && file_exists($products_file_path)) {
     }
 
     // Add product name and category to each review
-    foreach ($reviews as $i => &$review) {
-        if (!isset($review['id'])) {
-            $review['id'] = $i;
-        }
+    foreach ($reviews as &$review) {
         if (isset($product_lookup[$review['product_id']])) {
             $product = $product_lookup[$review['product_id']];
             $review['product_name'] = $product['name'];
