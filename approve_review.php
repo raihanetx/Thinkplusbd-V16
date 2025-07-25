@@ -8,8 +8,18 @@ if ($review_id >= 0) {
     if (file_exists($reviews_file_path)) {
         $reviews_json = file_get_contents($reviews_file_path);
         $reviews = json_decode($reviews_json, true);
-        if (isset($reviews[$review_id])) {
-            $reviews[$review_id]['status'] = 'approved';
+
+        // Find the review by its ID and update its status
+        $review_found = false;
+        foreach ($reviews as $key => &$review) {
+            if (isset($review['id']) && $review['id'] === $review_id) {
+                $reviews[$key]['status'] = 'approved';
+                $review_found = true;
+                break;
+            }
+        }
+
+        if ($review_found) {
             file_put_contents($reviews_file_path, json_encode($reviews, JSON_PRETTY_PRINT));
             echo json_encode(['success' => true]);
             exit();

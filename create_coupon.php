@@ -1,10 +1,35 @@
+#!/usr/bin/env php
 <?php
 header('Content-Type: application/json');
-$input = json_decode(file_get_contents('php://input'), true);
+
+function generate_random_string($length = 8) {
+    $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $characters_length = strlen($characters);
+    $random_string = '';
+    for ($i = 0; $i < $length; $i++) {
+        $random_string .= $characters[rand(0, $characters_length - 1)];
+    }
+    return $random_string;
+}
+
+if (php_sapi_name() === 'cli') {
+    // Executed from command line
+    $input = array(
+        "discount_type" => "percentage",
+        "discount_value" => 10
+    );
+} else {
+    // Executed from web server
+    $input = json_decode(file_get_contents('php://input'), true);
+}
 
 $code = isset($input['code']) ? trim($input['code']) : '';
-$discount_type = isset($data['discount_type']) ? $data['discount_type'] : 'percentage';
-$discount_value = isset($data['discount_value']) ? (float)$data['discount_value'] : 0;
+if (empty($code)) {
+    $code = generate_random_string();
+}
+
+$discount_type = isset($input['discount_type']) ? $input['discount_type'] : 'percentage';
+$discount_value = isset($input['discount_value']) ? (float)$input['discount_value'] : 0;
 $product_ids = isset($input['product_ids']) ? $input['product_ids'] : null;
 $category = isset($input['category']) ? trim($input['category']) : null;
 
@@ -28,7 +53,7 @@ if (!empty($code) && $discount_value > 0) {
     $json_data = json_encode($coupons, JSON_PRETTY_PRINT);
     file_put_contents($coupons_file_path, $json_data);
 
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'coupon_code' => $code]);
     exit();
 }
 

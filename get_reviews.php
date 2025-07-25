@@ -6,7 +6,9 @@ if (file_exists($reviews_file_path)) {
     $reviews = json_decode($reviews_json, true);
     // Add an id to each review for easier handling on the frontend
     foreach ($reviews as $i => &$review) {
-        $review['id'] = $i;
+        if (!isset($review['id'])) {
+            $review['id'] = $i;
+        }
     }
     echo json_encode($reviews);
 } else {
