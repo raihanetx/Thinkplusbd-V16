@@ -8,20 +8,6 @@
 </div>
 <div class="content-card">
     <h2 class="card-title">Create Coupon</h2>
-    <div class="coupon-templates">
-        <div class="coupon-template" data-code="SAVE10" data-discount="10" data-type="percentage">
-            <h3>10% Off</h3>
-            <p>For all products</p>
-        </div>
-        <div class="coupon-template" data-code="50OFF" data-discount="50" data-type="fixed">
-            <h3>50 Taka Off</h3>
-            <p>For all products</p>
-        </div>
-        <div class="coupon-template" data-code="NEWUSER" data-discount="15" data-type="percentage">
-            <h3>15% Off</h3>
-            <p>For new users</p>
-        </div>
-    </div>
     <form id="create-coupon-form">
         <div class="form-group">
             <label for="coupon-code">Coupon Code</label>
@@ -29,6 +15,14 @@
                 <input type="text" id="coupon-code" style="flex-grow: 1;">
                 <button type="button" id="generate-random-code">Generate Random</button>
             </div>
+        </div>
+        <div class="form-group">
+            <label for="category-select">Category</label>
+            <select id="category-select" required></select>
+        </div>
+        <div class="form-group">
+            <label for="product-select">Products</label>
+            <select id="product-select" multiple required></select>
         </div>
         <div class="form-group">
             <label for="discount-type">Discount Type</label>
@@ -41,24 +35,8 @@
             <label for="discount-value">Discount Value</label>
             <input type="number" id="discount-value" required>
         </div>
-        <div class="form-group">
-            <label for="product-ids">Apply to Products</label>
-            <select id="product-ids" multiple style="width: 100%;"></select>
-        </div>
-        <div class="form-group">
-            <label for="category-ids">Apply to Categories</label>
-            <select id="category-ids" multiple style="width: 100%;"></select>
-        </div>
-        <button type="submit">Create Coupon</button>
-        <button type="button" id="save-and-create-another">Save & Create Another</button>
+        <button type="submit">Create New Coupon</button>
     </form>
-    <div class="coupon-preview">
-        <h3>Coupon Preview</h3>
-        <div class="coupon-preview-card">
-            <h4 id="preview-code">COUPONCODE</h4>
-            <p><span id="preview-discount">10%</span> off</p>
-        </div>
-    </div>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -83,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td>${coupon.code}</td>
                         <td>${coupon.discount_value}${coupon.discount_type === 'percentage' ? '%' : ' Taka'}</td>
                         <td>${coupon.product_ids ? coupon.product_ids.join(', ') : 'All'}</td>
-                        <td>${coupon.category ? coupon.category.join(', ') : 'All'}</td>
+                        <td>${coupon.category || 'All'}</td>
                         <td>
                             <button onclick="deleteCoupon('${coupon.code}')">Delete</button>
                         </td>
@@ -94,35 +72,33 @@ document.addEventListener('DOMContentLoaded', function() {
             container.innerHTML = html;
         });
 
-    // Populate product and category dropdowns
-    const productIdsSelect = document.getElementById('product-ids');
-    const categoryIdsSelect = document.getElementById('category-ids');
-
-    fetch('get_products.php')
-        .then(response => response.json())
-        .then(products => {
-            products.forEach(product => {
-                const option = new Option(product.name, product.id);
-                productIdsSelect.add(option);
-            });
-        });
+    // Populate category dropdown
+    const categorySelect = document.getElementById('category-select');
+    const productSelect = document.getElementById('product-select');
+    let allProducts = [];
 
     fetch('get_categories.php')
         .then(response => response.json())
         .then(categories => {
             categories.forEach(category => {
                 const option = new Option(category.name, category.name);
-                categoryIdsSelect.add(option);
+                categorySelect.add(option);
             });
         });
 
-    // Coupon template functionality
-    document.querySelectorAll('.coupon-template').forEach(template => {
-        template.addEventListener('click', function() {
-            document.getElementById('coupon-code').value = this.dataset.code;
-            document.getElementById('discount-type').value = this.dataset.type;
-            document.getElementById('discount-value').value = this.dataset.discount;
-            updatePreview();
+    fetch('get_products.php')
+        .then(response => response.json())
+        .then(products => {
+            allProducts = products;
+        });
+
+    categorySelect.addEventListener('change', function() {
+        const selectedCategory = this.value;
+        productSelect.innerHTML = '';
+        const filteredProducts = allProducts.filter(product => product.category === selectedCategory);
+        filteredProducts.forEach(product => {
+            const option = new Option(product.name, product.id);
+            productSelect.add(option);
         });
     });
 
@@ -130,47 +106,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('generate-random-code').addEventListener('click', function() {
         const randomCode = Math.random().toString(36).substring(2, 10).toUpperCase();
         document.getElementById('coupon-code').value = randomCode;
-        updatePreview();
     });
 
     const createCouponForm = document.getElementById('create-coupon-form');
-    const couponCodeInput = document.getElementById('coupon-code');
-    const discountTypeInput = document.getElementById('discount-type');
-    const discountValueInput = document.getElementById('discount-value');
-    const previewCode = document.getElementById('preview-code');
-    const previewDiscount = document.getElementById('preview-discount');
 
-    function updatePreview() {
-        previewCode.textContent = couponCodeInput.value || 'COUPONCODE';
-        const discountType = discountTypeInput.value;
-        const discountValue = discountValueInput.value;
-        if (discountType === 'percentage') {
-            previewDiscount.textContent = `${discountValue || 0}%`;
-        } else {
-            previewDiscount.textContent = `৳${discountValue || 0}`;
-        }
-    }
+    createCouponForm.addEventListener('submit', function(event) {
+        event.preventDefault();
 
-    couponCodeInput.addEventListener('input', updatePreview);
-    discountTypeInput.addEventListener('change', updatePreview);
-    discountValueInput.addEventListener('input', updatePreview);
-
-    function validateForm() {
-        if (discountValueInput.value.trim() === '' || isNaN(discountValueInput.value)) {
-            alert('Discount value is required and must be a number.');
-            return false;
-        }
-        return true;
-    }
-
-    function submitForm(reload = true) {
-        if (!validateForm()) return;
-
-        const code = couponCodeInput.value;
-        const discount_type = discountTypeInput.value;
-        const discount_value = discountValueInput.value;
-        const product_ids = Array.from(productIdsSelect.selectedOptions).map(option => option.value);
-        const category_ids = Array.from(categoryIdsSelect.selectedOptions).map(option => option.value);
+        const code = document.getElementById('coupon-code').value;
+        const discount_type = document.getElementById('discount-type').value;
+        const discount_value = document.getElementById('discount-value').value;
+        const category = categorySelect.value;
+        const product_ids = Array.from(productSelect.selectedOptions).map(option => option.value);
 
         fetch('create_coupon.php', {
             method: 'POST',
