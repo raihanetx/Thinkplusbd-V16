@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-$category = isset($_GET['category']) ? $_GET['category'] : '';
+$category = isset($_GET['category']) ? strtolower($_GET['category']) : '';
 
 if (empty($category)) {
     echo json_encode(['error' => 'Category not specified.']);
@@ -16,7 +16,7 @@ if (file_exists($products_file_path)) {
 
     $filtered_products = [];
     foreach ($products as $product) {
-        if (isset($product['category']) && $product['category'] === $category) {
+        if (isset($product['category']) && strtolower($product['category']) === $category) {
             $filtered_products[] = $product;
         }
     }
