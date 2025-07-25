@@ -1,1 +1,4 @@
--bash: php: command not found
+[Fri Jul 25 23:39:56 2025] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Fri Jul 25 23:39:58 2025] 127.0.0.1:50168 Accepted
+[Fri Jul 25 23:39:58 2025] 127.0.0.1:50168 [200]: GET /get_products_by_category.php?category=Software
+[Fri Jul 25 23:39:58 2025] 127.0.0.1:50168 Closing
