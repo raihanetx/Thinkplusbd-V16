@@ -64,6 +64,7 @@
 .review-card-body .review-author {
     font-size: 0.9em;
     color: #888;
+    font-style: italic;
 }
 
 .review-card-footer {
@@ -120,48 +121,113 @@
 }
 </style>
 <div class="content-card">
-    <h2 class="card-title">All Reviews</h2>
+    <h2 class="card-title">Manage Reviews</h2>
+    <div class="form-group">
+        <label for="category-filter">Category</label>
+        <select id="category-filter" class="form-control">
+            <option value="">Select Category</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="product-filter">Product</label>
+        <select id="product-filter" class="form-control" disabled>
+            <option value="">Select Product</option>
+        </select>
+    </div>
     <div id="reviews-container"></div>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    fetch('get_reviews.php')
+    const categoryFilter = document.getElementById('category-filter');
+    const productFilter = document.getElementById('product-filter');
+    const reviewsContainer = document.getElementById('reviews-container');
+
+    // Fetch categories and populate the category filter
+    fetch('get_categories.php')
         .then(response => response.json())
-        .then(data => {
-            const container = document.getElementById('reviews-container');
-            if (data.error) {
-                container.innerHTML = `<p>${data.error}</p>`;
-                return;
-            }
-            if (data.length === 0) {
-                container.innerHTML = '<p>No reviews to display.</p>';
-                return;
-            }
-            let html = '<div class="review-cards-container">';
-            data.forEach(review => {
-                html += `
-                    <div class="review-card" id="review-${review.id}">
-                        <div class="review-card-header">
-                            <span class="review-product">${review.product_name}</span>
-                            <span class="review-category">${review.category}</span>
-                        </div>
-                        <div class="review-card-body">
-                            <div class="review-rating">${''.padStart(review.rating, '★')}</div>
-                            <p class="review-comment">${review.comment}</p>
-                            <span class="review-author">By ${review.name} on ${new Date(review.timestamp).toLocaleDateString()}</span>
-                        </div>
-                        <div class="review-card-footer">
-                            <span class="review-status">${review.status}</span>
-                            <div class="review-actions">
-                                ${review.status !== 'approved' ? `<button class="approve-btn" onclick="approveReview(${review.id}, this)">Approve</button>` : ''}
-                                <button class="delete-btn" onclick="deleteReview(${review.id})">Delete</button>
-                            </div>
+        .then(categories => {
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name;
+                option.textContent = category.name;
+                categoryFilter.appendChild(option);
+            });
+        });
+
+    // Event listener for category filter
+    categoryFilter.addEventListener('change', function() {
+        const selectedCategory = this.value;
+        productFilter.innerHTML = '<option value="">Select Product</option>';
+        productFilter.disabled = true;
+        reviewsContainer.innerHTML = '';
+
+        if (selectedCategory) {
+            fetch(`get_products_by_category.php?category=${selectedCategory}`)
+                .then(response => response.json())
+                .then(products => {
+                    productFilter.disabled = false;
+                    products.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.id;
+                        option.textContent = product.name;
+                        productFilter.appendChild(option);
+                    });
+                });
+        }
+    });
+
+    // Event listener for product filter
+    productFilter.addEventListener('change', function() {
+        const selectedProductId = this.value;
+        reviewsContainer.innerHTML = '';
+
+        if (selectedProductId) {
+            fetch('get_reviews.php')
+                .then(response => response.json())
+                .then(reviews => {
+                    const filteredReviews = reviews.filter(review => review.product_id == selectedProductId);
+                    displayReviews(filteredReviews);
+                });
+        }
+    });
+
+    function displayReviews(reviews) {
+        if (reviews.length === 0) {
+            reviewsContainer.innerHTML = '<p>No reviews to display for this product.</p>';
+            return;
+        }
+        let html = '<div class="review-cards-container">';
+        reviews.forEach(review => {
+            html += `
+                <div class="review-card" id="review-${review.id}">
+                    <div class="review-card-header">
+                        <span class="review-product">${review.product_name}</span>
+                        <span class="review-category">${review.category}</span>
+                    </div>
+                    <div class="review-card-body">
+                        <div class="review-rating">${''.padStart(review.rating, '★')}</div>
+                        <p class="review-comment">${review.comment}</p>
+                        <span class="review-author">${review.name}</span>
+                    </div>
+                    <div class="review-card-footer">
+                        <span class="review-status">${review.status}</span>
+                        <div class="review-actions">
+                            ${review.status !== 'approved' ? `<button class="approve-btn" onclick="approveReview('${review.id}', this)">Approve</button>` : ''}
+                            <button class="delete-btn" onclick="deleteReview('${review.id}')">Delete</button>
                         </div>
                     </div>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
+                </div>
+            `;
+        });
+        html += '</div>';
+        reviewsContainer.innerHTML = html;
+    }
+
+    // Load all reviews initially
+    fetch('get_reviews.php')
+        .then(response => response.json())
+        .then(reviews => {
+            displayReviews(reviews);
         });
 });
 
