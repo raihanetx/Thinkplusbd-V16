@@ -703,7 +703,6 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
             updateStatsDisplay(document.getElementById('period_selector').value);
         });
     </script>
-    <script src="admin_dashboard.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const discountToggle = document.getElementById('discount-toggle');
@@ -720,5 +719,6 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
             }
         });
     </script>
+    <script src="admin_dashboard.js"></script>
 </body>
 </html>
