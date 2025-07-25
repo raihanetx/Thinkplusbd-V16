@@ -582,9 +582,10 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         .product-detail-price { font-size: 1.8rem; color: var(--primary-color); margin-bottom: 0.75rem; font-weight: 700; }
         .product-detail-description { margin-bottom: 1rem; line-height: 1.7; color: var(--text-color); font-size: 1rem; }
         .product-detail-actions { display: flex; gap: 1rem; margin-top: auto; }
-        .product-detail-actions .buy-now-detail { flex-grow: 1; padding: 0.9rem 1.8rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; background-color: var(--primary-color); color: white; border: none; }
+        .product-detail-actions .buy-now-detail, .product-detail-actions .add-to-cart-detail { flex-grow: 1; padding: 0.9rem 1.8rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-align: center; }
+        .product-detail-actions .buy-now-detail { background-color: var(--primary-color); color: white; border: none; }
         .product-detail-actions .buy-now-detail:hover { background-color: var(--primary-color); filter: brightness(0.9); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(143,135,241,0.3); }
-        .product-detail-actions .add-to-cart-detail { padding: 0.9rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; background-color: transparent; color: var(--primary-color); border: 2px solid var(--primary-color) !important; }
+        .product-detail-actions .add-to-cart-detail { background-color: transparent; color: var(--primary-color); border: 2px solid var(--primary-color) !important; }
         .product-detail-actions .add-to-cart-detail:hover { background-color: rgba(143,135,241,0.1); border-color: var(--primary-color); filter: brightness(0.95); }
 
         .product-detail-tabs {
@@ -611,6 +612,23 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         }
         .product-detail-tab-content.active {
             display: block;
+        }
+        .expandable .expandable-content {
+            max-height: 100px;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .expandable.expanded .expandable-content {
+            max-height: 1000px; /* Adjust as needed */
+        }
+        .show-more-btn {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            border-radius: 5px;
         }
 
         .related-products-section { margin-top: 3rem; padding: 2rem 0; background: transparent; }
@@ -1082,8 +1100,20 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             .product-actions { flex-direction: column; align-items: stretch; }
             .product-actions button { width: 100%; margin-bottom: 0.45rem; }
             .product-actions button:last-child { margin-bottom: 0; }
-            .product-detail-container { grid-template-columns: 1fr; gap: 1.35rem; }
-            .product-detail-main-image-container { aspect-ratio: 4 / 3; }
+            .product-detail-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+            .product-detail-main-image-container {
+                grid-column: 2 / 3;
+                grid-row: 1 / 2;
+                aspect-ratio: 4 / 3;
+            }
+            .product-detail-info {
+                grid-column: 1 / 2;
+                grid-row: 1 / 2;
+            }
             .product-detail-title { white-space: normal; overflow: visible; text-overflow: initial; }
             .product-listings.container { padding-left: 0.9rem; padding-right: 0.9rem; padding-top: 0.45rem; padding-bottom: 0.45rem; }
             .fab-container { bottom: 60px; right: 13px; padding-bottom: 22px; }
@@ -2335,13 +2365,15 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
                     <div class="product-detail-tab" data-tab="reviews">Reviews</div>
                 </div>
 
-                <div id="description" class="product-detail-tab-content active">
-                    <p>${longDescription}</p>
+                <div id="description" class="product-detail-tab-content active expandable">
+                    <p class="expandable-content">${longDescription}</p>
+                    <button class="show-more-btn">Show More</button>
                 </div>
 
-                <div id="reviews" class="product-detail-tab-content">
-                    <div id="reviews-container"></div>
-                    <form action="submit_review.php" method="POST" class="review-form">
+                <div id="reviews" class="product-detail-tab-content expandable">
+                    <div id="reviews-container" class="expandable-content"></div>
+                    <button class="show-more-btn">View All Reviews</button>
+                    <form action="submit_review.php" method="POST" class="review-form" style="display: none;">
                         <input type="hidden" name="product_id" value="${product.id}">
                         <div class="form-group">
                             <label for="name">Name:</label>
@@ -2414,6 +2446,27 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
 
             setupRelatedProductImages();
             setupTabs();
+            setupShowMore();
+        }
+
+        function setupShowMore() {
+            document.querySelectorAll('.expandable .show-more-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const expandable = this.parentElement;
+                    expandable.classList.toggle('expanded');
+                    if (expandable.classList.contains('expanded')) {
+                        this.textContent = 'Show Less';
+                        if (expandable.id === 'reviews') {
+                            expandable.querySelector('.review-form').style.display = 'block';
+                        }
+                    } else {
+                        this.textContent = expandable.id === 'reviews' ? 'View All Reviews' : 'Show More';
+                        if (expandable.id === 'reviews') {
+                            expandable.querySelector('.review-form').style.display = 'none';
+                        }
+                    }
+                });
+            });
         }
 
         function setupTabs() {

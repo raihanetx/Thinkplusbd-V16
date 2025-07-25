@@ -320,11 +320,17 @@ table.orders-table {
     font-size: 1rem;
 }
 
-/* --- START: REMOVED OLD MEDIA QUERY FOR LAYOUT --- */
-@media (max-width: 991.98px) {
-    /* Old layout rules are removed. Now only styling adjustments remain */
+@media (min-width: 992px) {
+    .admin-sidebar {
+        transform: translateX(0); /* Always visible on desktop */
+    }
+    .admin-main-content {
+        margin-left: 250px;
+    }
+    .admin-topbar .sidebar-toggle {
+        display: none; /* Hide toggle on desktop */
+    }
 }
-/* --- END: REMOVED OLD MEDIA QUERY --- */
 
 .category-cards-container {
     display: grid;
