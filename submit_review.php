@@ -22,7 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'name' => $name,
             'rating' => $rating,
             'comment' => $comment,
-            'timestamp' => date('Y-m-d H:i:s')
+            'timestamp' => date('Y-m-d H:i:s'),
+            'status' => 'pending' // Add status for admin approval
         ];
 
         $reviews[] = $new_review;

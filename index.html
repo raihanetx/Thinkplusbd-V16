@@ -29,6 +29,9 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THINK PLUS BD - Premium Digital Products</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alice&family=Anek+Bangla:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- START OF FILE style.css --- */
 
@@ -103,7 +106,7 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Alice', 'Anek Bangla', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
@@ -112,6 +115,10 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             min-height: 100vh;
             border: none;
             box-shadow: none;
+        }
+
+        :lang(bn) {
+            font-family: 'Anek Bangla', sans-serif;
         }
 
         main {
@@ -458,8 +465,8 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
                 height: 160px;
             }
         }
-        .category-name { font-size: 1.1rem; font-weight: 600; color: var(--text-color); line-height: 1.3; margin-bottom: 0.35rem; }
-        .category-subtitle { font-size: 0.85rem; color: #666666; line-height: 1.4; }
+        .category-name { font-size: 0.9rem; font-weight: 600; color: var(--text-color); line-height: 1.3; margin-bottom: 0.35rem; text-align: center; }
+        .category-subtitle { font-size: 0.7rem; color: #666666; line-height: 1.4; text-align: center; }
 
         .featured-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; margin-top: 2.5rem; }
         .product-listings > .featured-section-header:first-of-type { margin-top: 1rem; }
@@ -667,6 +674,40 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         .review-form label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
         .review-form input, .review-form textarea, .review-form select { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
         .review-form button { background-color: var(--primary-color); color: white; padding: 0.7rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; }
+
+        .review {
+            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
+        }
+        .review:last-child {
+            border-bottom: none;
+        }
+        .review-author {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .review-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+        }
+        .review-name {
+            font-weight: 600;
+        }
+        .review-rating {
+            color: #f39c12;
+            margin-bottom: 0.5rem;
+        }
+        .review-comment {
+            line-height: 1.6;
+        }
+        .review-timestamp {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 0.5rem;
+        }
 
         .checkout-page { background-color: #f8f9fa; margin: 0; min-height: calc(100vh - var(--header-height)); }
         .page#checkoutPage.active { display: flex; justify-content: center; align-items: flex-start; padding: 1.5rem 1.25rem; }
@@ -1448,6 +1489,11 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
                                 <span class="summary-total-label">Total Amount:</span>
                                 <span class="summary-total-value" id="orderTotalCheckout">৳0.00</span>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="coupon-code-checkout">Coupon Code:</label>
+                            <input type="text" id="coupon-code-checkout" name="coupon-code-checkout" placeholder="Enter coupon code">
+                            <button type="button" id="apply-coupon-btn">Apply</button>
                         </div>
                     </div>
 
@@ -2232,6 +2278,35 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             setupImageLoading();
         }
 
+        async function fetchAndDisplayReviews(productId, container) {
+            try {
+                const response = await fetch(`get_approved_reviews.php?product_id=${productId}`);
+                const reviews = await response.json();
+                let reviewsHTML = '';
+                if (reviews.length > 0) {
+                    reviews.forEach(review => {
+                        reviewsHTML += `
+                            <div class="review">
+                                <div class="review-author">
+                                    <img src="https://i.postimg.cc/4NtztqPt/IMG-20250603-130207-removebg-preview-1.png" alt="User Avatar" class="review-avatar">
+                                    <span class="review-name">${review.name}</span>
+                                </div>
+                                <div class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                                <p class="review-comment">${review.comment}</p>
+                                <div class="review-timestamp">${review.timestamp}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    reviewsHTML = '<p>No reviews yet.</p>';
+                }
+                container.innerHTML = reviewsHTML;
+            } catch (error) {
+                console.error('Error fetching reviews:', error);
+                container.innerHTML = '<p>Could not load reviews.</p>';
+            }
+        }
+
         function showProductDetail(productId) {
             let product = getProductById(productId);
             const detailPageElement = domElements.pages.productDetail;
@@ -2281,7 +2356,6 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
 
             const shortDescription = product.description ? nl2br(htmlspecialchars_decode(product.description)) : 'An exceptional digital product.';
             const longDescription = product.longDescription ? nl2br(htmlspecialchars_decode(product.longDescription)) : shortDescription;
-            const reviews = product.reviews ? nl2br(htmlspecialchars_decode(product.reviews)) : 'No reviews yet.';
 
             const stockStatus = product.stock > 0 ? "In Stock" : "Out of Stock";
 
@@ -2300,7 +2374,7 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
                         <div class="accordion-item">
                             <button class="accordion-header">Reviews</button>
                             <div class="accordion-content">
-                                <p>${reviews}</p>
+                                <div id="reviews-container"></div>
                                 <form action="submit_review.php" method="POST" class="review-form">
                                     <input type="hidden" name="product_id" value="${product.id}">
                                     <div class="form-group">
@@ -2329,6 +2403,9 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
                 </div>
                 ${relatedProductsHTML}
             `;
+
+            const reviewsContainer = detailPageElement.querySelector('#reviews-container');
+            fetchAndDisplayReviews(product.id, reviewsContainer);
 
             const detailDurationSelector = detailPageElement.querySelector(`#duration-detail-${product.id}`);
             if (detailDurationSelector) {
@@ -2404,6 +2481,39 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             orderTotalElement.textContent = `৳${total.toFixed(2)}`;
             document.querySelectorAll('#payment-instructions .dynamic-amount').forEach(span => { span.textContent = `৳${total.toFixed(2)}`; });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const applyCouponBtn = document.getElementById('apply-coupon-btn');
+            if (applyCouponBtn) {
+                applyCouponBtn.addEventListener('click', function() {
+                    const couponCode = document.getElementById('coupon-code-checkout').value;
+                    if (!couponCode) {
+                        showToast('Please enter a coupon code.', 'error');
+                        return;
+                    }
+                    fetch('apply_coupon.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            coupon_code: couponCode,
+                            cart: cart,
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Coupon applied successfully!', 'success');
+                            const orderTotalElement = document.getElementById('orderTotalCheckout');
+                            orderTotalElement.textContent = `৳${data.new_total.toFixed(2)}`;
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    });
+                });
+            }
+        });
         function updateOrderConfirmationMessage(orderId) { const orderIdDisplayElement = document.getElementById('orderIdDisplay'); if (orderIdDisplayElement) { orderIdDisplayElement.textContent = orderId; } }
         async function placeOrder() {
             const form = domElements.checkoutForm; if (!form) { showToast('Checkout form unavailable.', 'error'); return; }
