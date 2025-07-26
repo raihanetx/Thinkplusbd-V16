@@ -332,10 +332,23 @@ table.orders-table {
     }
 }
 
-.category-cards-container {
+.category-cards-container, .homepage-products-grid, .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
+}
+
+.homepage-products-grid, .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 767.98px) {
+    .homepage-products-grid, .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.category-cards-container {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .category-card {

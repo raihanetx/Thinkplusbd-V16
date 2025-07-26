@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $new_review = [
+            'id' => uniqid(),
             'product_id' => $product_id,
             'name' => $name,
             'rating' => $rating,
@@ -30,11 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $json_data = json_encode($reviews, JSON_PRETTY_PRINT);
         file_put_contents($reviews_file_path, $json_data);
 
-        header("Location: index.html#product/1/capcut-pro-pc-version&status=review_submitted"); // Redirect back to product page
+        $redirect_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.html';
+        $separator = parse_url($redirect_url, PHP_URL_QUERY) ? '&' : '?';
+        header("Location: " . $redirect_url . $separator . "status=review_submitted");
         exit();
     }
 }
 
-header("Location: index.html#product/1/capcut-pro-pc-version&status=review_failed"); // Redirect back to product page
+$redirect_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.html';
+$separator = parse_url($redirect_url, PHP_URL_QUERY) ? '&' : '?';
+header("Location: " . $redirect_url . $separator . "status=review_failed");
 exit();
 ?>

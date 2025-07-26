@@ -154,6 +154,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
         }
 
+        if (isset($_POST['coupon_toggle']) && $_POST['coupon_toggle'] === 'on') {
+            $new_product['coupon'] = [
+                'code' => $_POST['coupon_code'],
+                'type' => $_POST['coupon_discount_type'],
+                'value' => (float)$_POST['coupon_discount_value']
+            ];
+        }
+
         $products[] = $new_product;
         save_products($products);
 
@@ -202,6 +210,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
                         $products[$product_index]['image'] = $target_file;
                     }
+                }
+
+                if (isset($_POST['coupon_toggle']) && $_POST['coupon_toggle'] === 'on') {
+                    $products[$product_index]['coupon'] = [
+                        'code' => $_POST['coupon_code'],
+                        'type' => $_POST['coupon_discount_type'],
+                        'value' => (float)$_POST['coupon_discount_value']
+                    ];
+                } else {
+                    unset($products[$product_index]['coupon']);
                 }
 
                 save_products($products);
@@ -278,8 +296,7 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                     <li><a href="admin_dashboard.php" class="<?php echo (strpos($_SERVER['REQUEST_URI'], 'admin_dashboard.php') !== false && empty($_GET['page']) && strpos($_SERVER['REQUEST_URI'], 'product_code_generator.html') === false) ? 'active' : ''; ?>"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a></li>
                     <li><a href="admin_dashboard.php?page=categories" class="<?php echo (isset($_GET['page']) && $_GET['page'] === 'categories') ? 'active' : ''; ?>"><i class="fas fa-tags"></i> <span>Manage Categories</span></a></li>
                     <li><a href="admin_dashboard.php?page=edit_products" class="<?php echo (isset($_GET['page']) && $_GET['page'] === 'edit_products') ? 'active' : ''; ?>"><i class="fas fa-edit"></i> <span>Edit Products</span></a></li>
-                    <li><a href="admin_reviews.php" class="<?php echo (strpos($_SERVER['REQUEST_URI'], 'admin_reviews.php') !== false) ? 'active' : ''; ?>"><i class="fas fa-star"></i> <span>Manage Reviews</span></a></li>
-                    <li><a href="admin_coupons.php" class="<?php echo (strpos($_SERVER['REQUEST_URI'], 'admin_coupons.php') !== false) ? 'active' : ''; ?>"><i class="fas fa-tags"></i> <span>Manage Coupons</span></a></li>
+                    <li><a href="admin_dashboard.php?page=reviews" class="<?php echo (isset($_GET['page']) && $_GET['page'] === 'reviews') ? 'active' : ''; ?>"><i class="fas fa-star"></i> <span>Manage Reviews</span></a></li>
                     <li><a href="product_code_generator.html" target="_blank"><i class="fas fa-plus-circle"></i> <span>Add Product Helper</span></a></li>
                     <li><a href="admin_dashboard.php?logout=1"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
                 </ul>
@@ -294,7 +311,11 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                 <a href="admin_dashboard.php?logout=1" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </header>
             <div class="admin-page-content">
-            <?php if (isset($_GET['page']) && $_GET['page'] === 'categories'): ?>
+            <?php if (isset($_GET['page']) && $_GET['page'] === 'reviews'): ?>
+                <?php include 'admin_reviews.php'; ?>
+            <?php elseif (isset($_GET['page']) && $_GET['page'] === 'coupons'): ?>
+                <?php include 'admin_coupons.php'; ?>
+            <?php elseif (isset($_GET['page']) && $_GET['page'] === 'categories'): ?>
                 <div class="content-card">
                     <h2 class="card-title">Manage Categories</h2>
                     <?php
@@ -485,6 +506,29 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                             </div>
                         </div>
 
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="coupon-toggle">Add Coupon Code?</label>
+                            <input type="checkbox" name="coupon_toggle" id="coupon-toggle">
+                        </div>
+
+                        <div id="coupon-fields" style="display: none;">
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label for="coupon-code">Coupon Code</label>
+                                <input type="text" name="coupon_code" id="coupon-code" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label for="coupon-discount-type">Discount Type</label>
+                                <select name="coupon_discount_type" id="coupon-discount-type" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);">
+                                    <option value="percentage">Percentage</option>
+                                    <option value="fixed">Fixed Amount</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label for="coupon-discount-value">Discount Value</label>
+                                <input type="number" step="0.01" name="coupon_discount_value" id="coupon-discount-value" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);">
+                            </div>
+                        </div>
+
                         <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; border: none; background-color: var(--primary-color); color: white; border-radius: var(--border-radius); cursor: pointer;">Add Product</button>
                     </form>
                 </div>
@@ -553,6 +597,29 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                             <div class="form-group" style="margin-bottom: 1rem;">
                                 <label for="image">Upload New Image (optional)</label>
                                 <input type="file" name="image" id="image" class="form-control-file">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label for="coupon-toggle">Add/Edit Coupon Code?</label>
+                                <input type="checkbox" name="coupon_toggle" id="coupon-toggle" <?php if (isset($product_to_edit['coupon'])) echo 'checked'; ?>>
+                            </div>
+
+                            <div id="coupon-fields" style="<?php if (!isset($product_to_edit['coupon'])) echo 'display: none;'; ?>">
+                                <div class="form-group" style="margin-bottom: 1rem;">
+                                    <label for="coupon-code">Coupon Code</label>
+                                    <input type="text" name="coupon_code" id="coupon-code" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);" value="<?php if (isset($product_to_edit['coupon'])) echo htmlspecialchars($product_to_edit['coupon']['code']); ?>">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1rem;">
+                                    <label for="coupon-discount-type">Discount Type</label>
+                                    <select name="coupon_discount_type" id="coupon-discount-type" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);">
+                                        <option value="percentage" <?php if (isset($product_to_edit['coupon']) && $product_to_edit['coupon']['type'] === 'percentage') echo 'selected'; ?>>Percentage</option>
+                                        <option value="fixed" <?php if (isset($product_to_edit['coupon']) && $product_to_edit['coupon']['type'] === 'fixed') echo 'selected'; ?>>Fixed Amount</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1rem;">
+                                    <label for="coupon-discount-value">Discount Value</label>
+                                    <input type="number" step="0.01" name="coupon_discount_value" id="coupon-discount-value" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);" value="<?php if (isset($product_to_edit['coupon'])) echo htmlspecialchars($product_to_edit['coupon']['value']); ?>">
+                                </div>
                             </div>
 
                             <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; border: none; background-color: var(--primary-color); color: white; border-radius: var(--border-radius); cursor: pointer;">Update Product</button>
@@ -714,6 +781,19 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                         discountFields.style.display = 'block';
                     } else {
                         discountFields.style.display = 'none';
+                    }
+                });
+            }
+
+            const couponToggle = document.getElementById('coupon-toggle');
+            const couponFields = document.getElementById('coupon-fields');
+
+            if (couponToggle && couponFields) {
+                couponToggle.addEventListener('change', function() {
+                    if (this.checked) {
+                        couponFields.style.display = 'block';
+                    } else {
+                        couponFields.style.display = 'none';
                     }
                 });
             }
