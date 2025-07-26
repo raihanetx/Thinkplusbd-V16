@@ -1,4 +1,4 @@
-[Fri Jul 25 23:39:56 2025] PHP 8.3.6 Development Server (http://localhost:8000) started
-[Fri Jul 25 23:39:58 2025] 127.0.0.1:50168 Accepted
-[Fri Jul 25 23:39:58 2025] 127.0.0.1:50168 [200]: GET /get_products_by_category.php?category=Software
-[Fri Jul 25 23:39:58 2025] 127.0.0.1:50168 Closing
+[Fri Jul 25 23:57:16 2025] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Fri Jul 25 23:57:18 2025] 127.0.0.1:56720 Accepted
+[Fri Jul 25 23:57:18 2025] 127.0.0.1:56720 [302]: GET /admin_dashboard.php?page=add_product&category=Software
+[Fri Jul 25 23:57:18 2025] 127.0.0.1:56720 Closing
